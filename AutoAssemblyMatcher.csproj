@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="AsmResolver.DotNet" Version="5.5.1" />
     <PackageReference Include="ICSharpCode.Decompiler" Version="10.0.0.8330" />
+    <PackageReference Include="NaturalSort.Extension" Version="4.4.1" />
     <PackageReference Include="Scintilla5.NET" Version="6.1.2" />
   </ItemGroup>
 

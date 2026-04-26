@@ -4,6 +4,7 @@ using ICSharpCode.Decompiler.CSharp;
 using ICSharpCode.Decompiler.CSharp.OutputVisitor;
 using ICSharpCode.Decompiler.CSharp.Syntax;
 using ICSharpCode.Decompiler.TypeSystem;
+using NaturalSort.Extension;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -83,20 +84,23 @@ namespace AutoAssemblyMatcher
                     !ignored.Contains(t.Name) &&
                     t.Name.ToString().StartsWith("GClass")
                 // DEBUG
-                //&& t.Name.ToString().StartsWith("GClass211")
+                //&& t.Name.ToString().StartsWith("GClass557")
                 )
                 .Select(t =>
                 {
                     return new AssemblyType(t.Name, t);
-                }).ToList();
+                })
+                .OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase.WithNaturalSort())
+                .ToList();
+
+            // DEBUG
+            //var dummy = dummyDefinition.TopLevelTypes.FirstOrDefault(x => x.Name.ToString().StartsWith("PatrolPointChooserBoss"));
+            //AssemblyComparator.Calculate(assemblyTypes[0].Definition, dummy);
+            // DEBUG
 
             comboBoxAssembly.Items.Clear();
             comboBoxAssembly.Items.AddRange(assemblyTypes.Select(t => t.Name).ToArray());
             comboBoxAssembly.SelectedIndex = 0;
-
-            // DEBUG
-            //var dummy = dummyDefinition.TopLevelTypes.FirstOrDefault(x => x.Name.ToString().StartsWith("GoToBody"));
-            //AssemblyComparator.Calculate(assemblyTypes[0].Definition, dummy);
 
             SetAssemblyTypeIndex(0);
         }
@@ -207,10 +211,10 @@ namespace AutoAssemblyMatcher
 
             AssemblyType type = assemblyTypes[index];
 
-            // Set the textbox
             scintilla.ReadOnly = false;
             string code = GetAssemblySource(assemblyDecompiler, type.Definition.FullName);
             scintilla.Text = code;
+            scintilla.ScrollWidth = 1;
             scintilla.ReadOnly = true;
 
             // Get list of matching dummy classes
@@ -253,6 +257,7 @@ namespace AutoAssemblyMatcher
                 // Set the textbox
                 scintilla1.ReadOnly = false;
                 string code = GetAssemblySource(dummyDecompiler, type.Definition.FullName);
+                scintilla1.ScrollWidth = 1;
                 scintilla1.Text = code;
                 scintilla1.ReadOnly = true;
             }
@@ -260,6 +265,7 @@ namespace AutoAssemblyMatcher
             {
                 scintilla1.ReadOnly = false;
                 scintilla1.Text = "N/A";
+                scintilla1.ScrollWidth = 1;
                 scintilla1.ReadOnly = true;
             }
 
@@ -368,7 +374,8 @@ namespace AutoAssemblyMatcher
             {
                 OptionalArguments = false,
                 NamedArguments = false,
-                SortCustomAttributes = false
+                SortCustomAttributes = false,
+                UseExpressionBodyForCalculatedGetterOnlyProperties = false,
             };
 
             return new CSharpDecompiler(assemblyPath, settings);

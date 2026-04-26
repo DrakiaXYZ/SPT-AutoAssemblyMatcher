@@ -20,10 +20,10 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 ///
 /// Scoring rules:
 ///   - Inheritance count mismatch                              => 0 % immediately.
-///   - Public methods whose name does NOT start with "method_": matched by name + return type + parameter types.
-///   - Methods whose name starts with "method_"              : matched by return type + parameter types only.
-///   - Fields                                                 : matched by field type.
-///   - Properties                                             : matched by property type.
+///   - Public methods whose name does NOT start with "s?method_": matched by name + return type + parameter types.
+///   - Methods whose name starts with "s?method_"               : matched by return type + parameter types only.
+///   - Fields                                                   : matched by field type.
+///   - Properties                                               : matched by property type.
 ///
 /// Missing members in assembly2 and extra members in assembly2 both count
 /// negatively.  The final score is clamped to [0, 100].
@@ -179,8 +179,8 @@ public static class AssemblyComparator
             }
         }
 
-        totalPoints += keys1.Count;
-        earnedPoints += matched - remaining2.Count; // extras penalise
+        totalPoints += Math.Max(keys1.Count, keys2.Count);
+        earnedPoints += matched;
     }
 
     // -------------------------------------------------------------------------
@@ -219,9 +219,9 @@ public static class AssemblyComparator
 
     /// <summary>
     /// Splits a type's methods into two buckets:
-    ///   - Public bucket  : methods that are public and do NOT start with "method_".
-    ///   - Private bucket : methods that start with "method_", OR are private/protected,
-    ///                      regardless of whether the name starts with "method_".
+    ///   - Public bucket  : methods that are public and do NOT start with "s?method_".
+    ///   - Private bucket : methods that start with "s?method_", OR are private/protected,
+    ///                      regardless of whether the name starts with "s?method_".
     /// Excludes constructors, property/event accessors, and compiler-generated methods.
     /// </summary>
     private static (List<MethodDefinition> publicMethods,
@@ -233,21 +233,21 @@ public static class AssemblyComparator
 
         foreach (var m in t.Methods)
         {
-            // Skip constructors, property/event accessors (IsSpecialName),
-            // and compiler-generated helpers.
+            // Skip constructors and property/event accessors (IsSpecialName)
             if (m.IsConstructor
-             || m.IsSpecialName
-             || IsCompilerGenerated(m))
+             || m.IsSpecialName)
             {
                 continue;
             }
 
             bool hasMethodPrefix = m.Name is not null
-                                && m.Name.Value.StartsWith("method_", StringComparison.Ordinal);
+                                && (
+                                    m.Name.Value.StartsWith("method_", StringComparison.Ordinal)
+                                    || m.Name.Value.StartsWith("smethod_", StringComparison.Ordinal));
 
-            bool isPrivateOrProtected = m.IsPrivate || m.IsFamily || m.IsFamilyOrAssembly;
+            bool isPrivate = m.IsPrivate || (!m.IsVirtual && (m.IsFamily || m.IsFamilyOrAssembly));
 
-            if (hasMethodPrefix || isPrivateOrProtected)
+            if (hasMethodPrefix || isPrivate)
                 privateList.Add(m);
             else
                 publicList.Add(m);
