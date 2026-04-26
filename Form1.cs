@@ -5,6 +5,7 @@ using ICSharpCode.Decompiler.CSharp.OutputVisitor;
 using ICSharpCode.Decompiler.CSharp.Syntax;
 using ICSharpCode.Decompiler.TypeSystem;
 using NaturalSort.Extension;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -160,7 +161,7 @@ namespace AutoAssemblyMatcher
             }
         }
 
-        void LoadIgnored()
+        private void LoadIgnored()
         {
             if (File.Exists(ignoredPath))
             {
@@ -181,7 +182,7 @@ namespace AutoAssemblyMatcher
             }
         }
 
-        void LoadRemapped()
+        private void LoadRemapped()
         {
             if (File.Exists(remappedPath))
             {
@@ -202,25 +203,26 @@ namespace AutoAssemblyMatcher
             }
         }
 
-        void SaveIgnored()
+        private void SaveIgnored()
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string ignoreJson = JsonSerializer.Serialize(ignored, options);
-            File.WriteAllText(ignoredPath, ignoreJson);
+            SaveToJson(ignoredPath, ignored);
         }
 
-        void SaveRemapped()
+        private void SaveRemapped()
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string remappedJson = JsonSerializer.Serialize(remapped, options);
-            File.WriteAllText(remappedPath, remappedJson);
+            SaveToJson(remappedPath, remapped);
         }
 
-        void SaveSettings()
+        private void SaveSettings()
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string settingsJson = JsonSerializer.Serialize(settings, options);
-            File.WriteAllText(settingsPath, settingsJson);
+            SaveToJson(settingsPath, settings);
+        }
+
+        private void SaveToJson<T>(string path, T obj)
+        {
+            var options = new JsonSerializerOptions { WriteIndented = true, IndentSize = 4, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            string settingsJson = JsonSerializer.Serialize(obj, options);
+            File.WriteAllText(path, settingsJson);
         }
 
         private void SetAssemblyTypeIndex(int index)
@@ -368,7 +370,7 @@ namespace AutoAssemblyMatcher
             SaveSettings();
         }
 
-        public int DeviceToLogicalUnits(int deviceUnits)
+        private int DeviceToLogicalUnits(int deviceUnits)
         {
             float scalingFactor = this.DeviceDpi / 96f;
             return (int)Math.Round(deviceUnits / scalingFactor);
