@@ -63,14 +63,15 @@ namespace AutoAssemblyMatcher
             this.Width = LogicalToDeviceUnits(settings.WindowWidth);
             this.Height = LogicalToDeviceUnits(settings.WindowHeight);
 
+            assemblyDefinition = ModuleDefinition.FromFile(settings.AssemblyDll);
+            dummyDefinition = ModuleDefinition.FromFile(settings.DummyDll);
+            assemblyDecompiler = CreateDecompiler(settings.AssemblyDll);
+            dummyDecompiler = CreateDecompiler(settings.DummyDll);
+
             LoadMappings();
             LoadIgnored();
             LoadRemapped();
-            assemblyDefinition = ModuleDefinition.FromFile(settings.AssemblyDll);
-            dummyDefinition = ModuleDefinition.FromFile(settings.DummyDll);
-
-            assemblyDecompiler = CreateDecompiler(settings.AssemblyDll);
-            dummyDecompiler = CreateDecompiler(settings.DummyDll);
+            CleanRemapped();
 
             // DEBUG
             //GetAssemblySource(dummyDecompiler, "GoToSuppressionFireRequest");
@@ -203,6 +204,14 @@ namespace AutoAssemblyMatcher
             }
         }
 
+        private void CleanRemapped()
+        {
+            // To make it so the user doesn't need to constantly clean up their remapped file, remove anything that exists
+            // in either the Mappings file, or no longer exists in the assembly
+            var assemblyTypeNames = assemblyDefinition.TopLevelTypes.Select(x => x.Name).ToList();
+            remapped = remapped.Where(x => !mappedNames.Contains(x.Key) && assemblyTypeNames.Contains((x.Key))).ToDictionary();
+        }
+
         private void SaveIgnored()
         {
             SaveToJson(ignoredPath, ignored);
@@ -321,7 +330,15 @@ namespace AutoAssemblyMatcher
             var oldType = assemblyTypes[currentAssemblyIndex].Definition;
             var newType = currentDummyTypes[currentDummyIndex].Type.Definition;
 
-            var remap = new Remap(newType.Name);
+            // Assembly tool needs the new name to not have `1
+            var newName = newType.Name.ToString();
+            var newNameBacktickIndex = newName.IndexOf('`');
+            if (newNameBacktickIndex >= 0)
+            {
+                newName = newName.Remove(newNameBacktickIndex);
+            }
+
+            var remap = new Remap(newName);
             if (newType.Namespace is not null)
             {
                 remap.NewNamespace = newType.Namespace;
