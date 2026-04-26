@@ -111,7 +111,8 @@ namespace AutoAssemblyMatcher
             {
                 try
                 {
-                    settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(settingsPath));
+                    var options = new JsonSerializerOptions { AllowTrailingCommas = true };
+                    settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(settingsPath), options);
                 }
                 catch (Exception) { }
             }
@@ -161,26 +162,44 @@ namespace AutoAssemblyMatcher
 
         void LoadIgnored()
         {
-            try
+            if (File.Exists(ignoredPath))
             {
-                if (File.Exists(ignoredPath))
+                var json = File.ReadAllText(ignoredPath);
+                try
                 {
-                    ignored = JsonSerializer.Deserialize<List<string>>(File.ReadAllText(ignoredPath));
+                    var options = new JsonSerializerOptions { AllowTrailingCommas = true };
+                    ignored = JsonSerializer.Deserialize<List<string>>(json, options);
+                }
+                catch (Exception ex)
+                {
+                    if (json.Length > 0)
+                    {
+                        MessageBox.Show($"Exception loading ignored.json, verify or delete file. Exiting\n\n{ex.Message}");
+                        Environment.Exit(0);
+                    }
                 }
             }
-            catch (Exception) { }
         }
 
         void LoadRemapped()
         {
-            try
+            if (File.Exists(remappedPath))
             {
-                if (File.Exists(remappedPath))
+                var json = File.ReadAllText(remappedPath);
+                try
                 {
-                    remapped = JsonSerializer.Deserialize<Dictionary<string, Remap>>(File.ReadAllText(remappedPath));
+                    var options = new JsonSerializerOptions { AllowTrailingCommas = true };
+                    remapped = JsonSerializer.Deserialize<Dictionary<string, Remap>>(json, options);
+                }
+                catch (Exception ex)
+                {
+                    if (json.Length > 0)
+                    {
+                        MessageBox.Show($"Exception loading remapped.json, verify or delete file. Exiting\n\n{ex.Message}");
+                        Environment.Exit(0);
+                    }
                 }
             }
-            catch (Exception) { }
         }
 
         void SaveIgnored()
@@ -257,7 +276,6 @@ namespace AutoAssemblyMatcher
                 // Set the textbox
                 scintilla1.ReadOnly = false;
                 string code = GetAssemblySource(dummyDecompiler, type.Definition.FullName);
-                scintilla1.ScrollWidth = 1;
                 scintilla1.Text = code;
                 scintilla1.ReadOnly = true;
             }
@@ -265,9 +283,9 @@ namespace AutoAssemblyMatcher
             {
                 scintilla1.ReadOnly = false;
                 scintilla1.Text = "N/A";
-                scintilla1.ScrollWidth = 1;
                 scintilla1.ReadOnly = true;
             }
+            scintilla1.ScrollWidth = 1;
 
             buttonPrev.Enabled = index > 0;
             buttonNext.Enabled = currentDummyTypes.Count > index + 1;
@@ -298,7 +316,7 @@ namespace AutoAssemblyMatcher
 
         private void buttonAssociate_Click(object sender, EventArgs e)
         {
-            var oldType = assemblyTypes[currentAssemblyIndex];
+            var oldType = assemblyTypes[currentAssemblyIndex].Definition;
             var newType = currentDummyTypes[currentDummyIndex].Type.Definition;
 
             var remap = new Remap(newType.Name);
@@ -308,7 +326,7 @@ namespace AutoAssemblyMatcher
             }
             if (newType.NestedTypes.Count > 0)
             {
-                remap.HasChildClasses = newType.NestedTypes.Any(x => x.IsCompilerGenerated());
+                remap.HasChildClasses = oldType.NestedTypes.Any(x => !x.IsCompilerGenerated());
             }
 
             remapped.Add(oldType.Name, remap);
