@@ -157,9 +157,20 @@ namespace AutoAssemblyMatcher
             var mappings = JsonNode.Parse(File.ReadAllText(settings.MappingFile), documentOptions: options).AsObject();
             foreach (var property in mappings)
             {
-                usedNames.Add(property.Value["NewName"].ToString());
+                var newName = GetFullName(property.Value["NewName"].ToString(), property.Value["NewNamespace"]?.ToString());
+                usedNames.Add(newName);
                 mappedNames.Add(property.Key);
             }
+        }
+
+        private string GetFullName(string name, string? ns)
+        {
+            if (ns != null)
+            {
+                name = $"{ns}.{name}";
+            }
+
+            return name;
         }
 
         private void LoadIgnored()
@@ -249,7 +260,7 @@ namespace AutoAssemblyMatcher
 
             // Get list of matching dummy classes
             currentDummyTypes = AssemblyComparator.Calculate(type.Definition, dummyDefinition)
-                .Where(x => !usedNames.Contains(x.Type.Name))
+                .Where(x => !usedNames.Contains(x.Type.FullName))
                 .Select(x =>
                 {
                     return (new AssemblyType(x.Type.Name, x.Type), x.Score);
@@ -351,7 +362,7 @@ namespace AutoAssemblyMatcher
             remapped.Add(oldType.Name, remap);
             SaveRemapped();
 
-            usedNames.Add(newType.Name);
+            usedNames.Add(newType.FullName);
 
             NextAssemblyType();
         }
