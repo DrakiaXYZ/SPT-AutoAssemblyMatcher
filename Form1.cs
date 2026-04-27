@@ -287,6 +287,12 @@ namespace AutoAssemblyMatcher
                     listViewItem.BackColor = Color.Salmon;
                 }
                 listViewDummy.Items.Add(listViewItem);
+
+                // Limit to first 100, for sanity's sake
+                if (listViewDummy.Items.Count >= 100)
+                {
+                    break;
+                }
             }
             listViewDummy.Columns[0].Width = listViewDummy.ClientSize.Width - 4; ;
 
