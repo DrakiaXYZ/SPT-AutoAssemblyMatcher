@@ -11,6 +11,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 // Please forgive me for what you're about to read
 
@@ -294,7 +295,12 @@ namespace AutoAssemblyMatcher
                     break;
                 }
             }
-            listViewDummy.Columns[0].Width = listViewDummy.ClientSize.Width - 4; ;
+            //listViewDummy.Columns[0].Width = listViewDummy.ClientSize.Width - 4;
+            listViewDummy.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            if (listViewDummy.Columns[0].Width < listViewDummy.ClientSize.Width - 4)
+            {
+                listViewDummy.Columns[0].Width = listViewDummy.ClientSize.Width - 4;
+            }
 
             SetDummyTypeIndex(0);
             buttonAssociate.Enabled = currentDummyTypes.Count > 0;
