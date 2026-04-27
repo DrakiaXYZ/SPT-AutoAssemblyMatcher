@@ -5,6 +5,8 @@ using ICSharpCode.Decompiler.CSharp.OutputVisitor;
 using ICSharpCode.Decompiler.CSharp.Syntax;
 using ICSharpCode.Decompiler.TypeSystem;
 using NaturalSort.Extension;
+using ScintillaNET;
+using ScintillaNET_FindReplaceDialog;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -39,6 +41,8 @@ namespace AutoAssemblyMatcher
         private string ignoredPath = Settings.GetFilePath("ignored.json");
 
         private bool settingDummyIndex = false;
+        private FindReplace AssemblyFindReplace;
+        private FindReplace DummyFindReplace;
 
         public Form1()
         {
@@ -47,6 +51,11 @@ namespace AutoAssemblyMatcher
             AISlopStyler styler = new AISlopStyler();
             styler.ApplyScintillaStyle(scintilla);
             styler.ApplyScintillaStyle(scintilla1);
+
+            AssemblyFindReplace = new FindReplace(scintilla);
+            AssemblyFindReplace.KeyPressed += genericFindReplace_KeyDown;
+            DummyFindReplace = new FindReplace(scintilla1);
+            DummyFindReplace.KeyPressed += genericFindReplace_KeyDown;
         }
 
         private void Form1_Shown(object sender, EventArgs e)
@@ -382,6 +391,61 @@ namespace AutoAssemblyMatcher
             settings.Zoom = scintilla1.Zoom;
             scintilla.Zoom = scintilla1.Zoom;
             SaveSettings();
+        }
+
+        private void genericScintilla_KeyDown(object sender, KeyEventArgs e)
+        {
+            FindReplace findReplace = null;
+            if (sender == scintilla)
+            {
+                findReplace = AssemblyFindReplace;
+            }
+            else if (sender == scintilla1)
+            {
+                findReplace = DummyFindReplace;
+            }
+
+            if (findReplace == null)
+            {
+                return;
+            }
+
+            if (e.Control && e.KeyCode == Keys.F)
+            {
+                findReplace.ShowIncrementalSearch();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.Shift && e.KeyCode == Keys.F3)
+            {
+                findReplace.Window.FindPrevious();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.KeyCode == Keys.F3)
+            {
+                findReplace.Window.FindNext();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.Control && e.KeyCode == Keys.H)
+            {
+                findReplace.ShowReplace();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.Control && e.KeyCode == Keys.I)
+            {
+                findReplace.ShowIncrementalSearch();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.Control && e.KeyCode == Keys.G)
+            {
+                GoTo MyGoTo = new GoTo((Scintilla)sender);
+                MyGoTo.ShowGoToDialog();
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void genericFindReplace_KeyDown(object sender, KeyEventArgs e)
+        {
+            genericScintilla_KeyDown(sender, e);
         }
 
         private void Form1_ResizeEnd(object sender, EventArgs e)

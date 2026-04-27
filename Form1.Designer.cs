@@ -59,6 +59,7 @@ namespace AutoAssemblyMatcher
             scintilla.TabIndex = 0;
             scintilla.Text = "Loading...";
             scintilla.ZoomChanged += scintilla_ZoomChanged;
+            scintilla.KeyDown += genericScintilla_KeyDown;
             // 
             // scintilla1
             // 
@@ -74,6 +75,7 @@ namespace AutoAssemblyMatcher
             scintilla1.TabIndex = 1;
             scintilla1.Text = "Loading...";
             scintilla1.ZoomChanged += scintilla1_ZoomChanged;
+            scintilla1.KeyDown += genericScintilla_KeyDown;
             // 
             // tableLayoutPanel1
             // 
