@@ -38,6 +38,8 @@ namespace AutoAssemblyMatcher
         private string remappedPath = Settings.GetFilePath("remapped.json");
         private string ignoredPath = Settings.GetFilePath("ignored.json");
 
+        private bool settingDummyIndex = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -266,21 +268,18 @@ namespace AutoAssemblyMatcher
                     return (new AssemblyType(x.Type.Name, x.Type), x.Score);
                 }).ToList();
 
-            comboBoxDummy.Items.Clear();
-            comboBoxDummy.Items.AddRange(currentDummyTypes.Select(t => $"{t.Type.Name} ({Math.Floor(t.Score)}%)").ToArray());
-            if (comboBoxDummy.Items.Count > 0)
+            listViewDummy.Items.Clear();
+            var multipleHundred = currentDummyTypes.Where(t => t.Score == 100).Count() > 1;
+            foreach (var dummyType in currentDummyTypes)
             {
-                comboBoxDummy.SelectedIndex = 0;
+                var listViewItem = new ListViewItem($"{dummyType.Type.Name} ({Math.Floor(dummyType.Score)}%)");
+                if (dummyType.Score == 100 && multipleHundred)
+                {
+                    listViewItem.BackColor = Color.Salmon;
+                }
+                listViewDummy.Items.Add(listViewItem);
             }
-
-            if (currentDummyTypes.Where(t => t.Score == 100).Count() > 1)
-            {
-                comboBoxDummy.BackColor = Color.Salmon;
-            }
-            else
-            {
-                comboBoxDummy.BackColor = SystemColors.Window;
-            }
+            listViewDummy.Columns[0].Width = listViewDummy.ClientSize.Width - 4; ;
 
             SetDummyTypeIndex(0);
             buttonAssociate.Enabled = currentDummyTypes.Count > 0;
@@ -288,10 +287,22 @@ namespace AutoAssemblyMatcher
 
         private void SetDummyTypeIndex(int index)
         {
+            if (settingDummyIndex)
+            {
+                return;
+            }
+
             if (index < currentDummyTypes.Count)
             {
                 currentDummyIndex = index;
-                comboBoxDummy.SelectedIndex = index;
+                if (listViewDummy.Items.Count > index)
+                {
+                    settingDummyIndex = true;
+                    listViewDummy.Items[index].Selected = true;
+                    listViewDummy.Items[index].EnsureVisible();
+                    listViewDummy.Items[index].Focused = true;
+                    settingDummyIndex = false;
+                }
 
                 var (type, score) = currentDummyTypes[index];
 
@@ -308,19 +319,6 @@ namespace AutoAssemblyMatcher
                 scintilla1.ReadOnly = true;
             }
             scintilla1.ScrollWidth = 1;
-
-            buttonPrev.Enabled = index > 0;
-            buttonNext.Enabled = currentDummyTypes.Count > index + 1;
-        }
-
-        private void buttonNext_Click(object sender, EventArgs e)
-        {
-            SetDummyTypeIndex(currentDummyIndex + 1);
-        }
-
-        private void buttonPrev_Click(object sender, EventArgs e)
-        {
-            SetDummyTypeIndex(currentDummyIndex - 1);
         }
 
         private void buttonSkip_Click(object sender, EventArgs e)
@@ -372,11 +370,6 @@ namespace AutoAssemblyMatcher
             SetAssemblyTypeIndex(comboBoxAssembly.SelectedIndex);
         }
 
-        private void comboBoxDummy_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            SetDummyTypeIndex(comboBoxDummy.SelectedIndex);
-        }
-
         private void scintilla_ZoomChanged(object sender, EventArgs e)
         {
             settings.Zoom = scintilla.Zoom;
@@ -396,6 +389,38 @@ namespace AutoAssemblyMatcher
             settings.WindowWidth = DeviceToLogicalUnits(this.Width);
             settings.WindowHeight = DeviceToLogicalUnits(this.Height);
             SaveSettings();
+        }
+
+        private void listViewDummy_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!settingDummyIndex && listViewDummy.SelectedIndices.Count > 0)
+            {
+                SetDummyTypeIndex(listViewDummy.SelectedIndices[0]);
+            }
+        }
+
+        private void listViewDummy_DrawItem(object sender, DrawListViewItemEventArgs e)
+        {
+            if (!e.Item.Selected)
+            {
+                e.DrawBackground();
+                e.DrawText();
+            }
+            else
+            {
+                using (SolidBrush backBrush = new SolidBrush(e.Item.BackColor))
+                {
+                    e.Graphics.FillRectangle(backBrush, e.Bounds);
+
+                    using (Pen selectionPen = new Pen(Color.Black, 3))
+                    {
+                        Rectangle rect = e.Bounds;
+                        rect.Inflate(-2, -2);
+                        e.Graphics.DrawRectangle(selectionPen, rect);
+                    }
+                }
+                e.DrawText();
+            }
         }
 
         private int DeviceToLogicalUnits(int deviceUnits)
@@ -482,8 +507,6 @@ namespace AutoAssemblyMatcher
             buttonSkip.Enabled = false;
             buttonIgnore.Enabled = false;
             buttonAssociate.Enabled = false;
-            buttonNext.Enabled = false;
-            buttonPrev.Enabled = false;
         }
 
         private class AssemblyType
