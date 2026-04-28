@@ -609,6 +609,9 @@ namespace AutoAssemblyMatcher
             public string? NewNamespace { get; set; }
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
             public bool HasChildClasses { get; set; } = false;
+
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+            public Dictionary<string, Dictionary<string, string>>? NestedTypes { get; set; }
         }
 
         private class Settings
