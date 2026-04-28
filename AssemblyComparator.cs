@@ -1,13 +1,7 @@
 ﻿// Required NuGet package: AsmResolver.DotNet
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 /// <summary>
 /// Compares two compiled .NET assemblies (DLLs) and returns a percentage
@@ -245,9 +239,10 @@ public static class AssemblyComparator
                                     m.Name.Value.StartsWith("method_", StringComparison.Ordinal)
                                     || m.Name.Value.StartsWith("smethod_", StringComparison.Ordinal));
 
+            bool isExplicitImplementation = m.Name.Contains(".");
             bool isPrivate = m.IsPrivate || (!m.IsVirtual && (m.IsFamily || m.IsFamilyOrAssembly));
 
-            if (hasMethodPrefix || isPrivate)
+            if (!isExplicitImplementation && (hasMethodPrefix || isPrivate))
                 privateList.Add(m);
             else
                 publicList.Add(m);
@@ -278,7 +273,14 @@ public static class AssemblyComparator
         var paramTypes = m.Signature?.ParameterTypes.Select(t => TypeKey(t, genericParams, owningType))
                         ?? Enumerable.Empty<string>();
 
-        return $"{m.Name}|{TypeKey(m.Signature?.ReturnType, genericParams, owningType)}|({string.Join(",", paramTypes)})";
+        var methodName = m.Name.ToString();
+        var dotIndex = methodName.IndexOf('.');
+        if (dotIndex >= 0)
+        {
+            methodName = methodName[dotIndex..];
+        }
+
+        return $"{methodName}|{TypeKey(m.Signature?.ReturnType, genericParams, owningType)}|({string.Join(",", paramTypes)})";
     }
 
     private static string AnonymousMethodKey(MethodDefinition m, TypeDefinition owningType)

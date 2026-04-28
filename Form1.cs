@@ -98,7 +98,7 @@ namespace AutoAssemblyMatcher
                     !ignored.Contains(t.Name) &&
                     t.Name.ToString().StartsWith("GClass")
                 // DEBUG
-                //&& t.Name.ToString().StartsWith("GClass557")
+                //&& t.Name.ToString().StartsWith("GClass2299`2")
                 )
                 .Select(t =>
                 {
@@ -108,7 +108,7 @@ namespace AutoAssemblyMatcher
                 .ToList();
 
             // DEBUG
-            //var dummy = dummyDefinition.TopLevelTypes.FirstOrDefault(x => x.Name.ToString().StartsWith("PatrolPointChooserBoss"));
+            //var dummy = dummyDefinition.TopLevelTypes.FirstOrDefault(x => x.Name.ToString().StartsWith("UnitySerializedDictionary"));
             //AssemblyComparator.Calculate(assemblyTypes[0].Definition, dummy);
             // DEBUG
 
@@ -295,7 +295,7 @@ namespace AutoAssemblyMatcher
                     break;
                 }
             }
-            //listViewDummy.Columns[0].Width = listViewDummy.ClientSize.Width - 4;
+
             listViewDummy.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             if (listViewDummy.Columns[0].Width < listViewDummy.ClientSize.Width - 4)
             {
