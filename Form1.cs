@@ -98,7 +98,7 @@ namespace AutoAssemblyMatcher
                     !ignored.Contains(t.Name) &&
                     t.Name.ToString().StartsWith("GClass")
                 // DEBUG
-                //&& t.Name.ToString().StartsWith("GClass2299`2")
+                //&& t.Name.ToString().StartsWith("GClass2497")
                 )
                 .Select(t =>
                 {
@@ -224,6 +224,12 @@ namespace AutoAssemblyMatcher
                         Environment.Exit(0);
                     }
                 }
+            }
+
+            foreach (var remap in remapped.Values)
+            {
+                var newName = GetFullName(remap.NewName, remap.NewNamespace);
+                usedNames.Add(newName);
             }
         }
 

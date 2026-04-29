@@ -55,7 +55,7 @@ namespace AutoAssemblyMatcher
             scintilla.Margin = new Padding(2);
             scintilla.Name = "scintilla";
             scintilla.ScrollWidth = 293;
-            scintilla.Size = new Size(461, 679);
+            scintilla.Size = new Size(491, 679);
             scintilla.TabIndex = 0;
             scintilla.Text = "Loading...";
             scintilla.ZoomChanged += scintilla_ZoomChanged;
@@ -67,11 +67,11 @@ namespace AutoAssemblyMatcher
             scintilla1.AutocompleteListSelectedBackColor = Color.FromArgb(0, 120, 212);
             scintilla1.AutocompleteListTextColor = Color.Blue;
             scintilla1.LexerName = null;
-            scintilla1.Location = new Point(467, 32);
+            scintilla1.Location = new Point(497, 32);
             scintilla1.Margin = new Padding(2);
             scintilla1.Name = "scintilla1";
             scintilla1.ScrollWidth = 293;
-            scintilla1.Size = new Size(461, 679);
+            scintilla1.Size = new Size(492, 679);
             scintilla1.TabIndex = 1;
             scintilla1.Text = "Loading...";
             scintilla1.ZoomChanged += scintilla1_ZoomChanged;
@@ -95,7 +95,7 @@ namespace AutoAssemblyMatcher
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
-            tableLayoutPanel1.Size = new Size(930, 743);
+            tableLayoutPanel1.Size = new Size(991, 743);
             tableLayoutPanel1.TabIndex = 2;
             // 
             // tableLayoutPanel2
@@ -104,11 +104,11 @@ namespace AutoAssemblyMatcher
             tableLayoutPanel2.ColumnCount = 2;
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel2.Location = new Point(468, 716);
+            tableLayoutPanel2.Location = new Point(498, 716);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
             tableLayoutPanel2.RowCount = 1;
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel2.Size = new Size(459, 24);
+            tableLayoutPanel2.Size = new Size(490, 24);
             tableLayoutPanel2.TabIndex = 3;
             // 
             // comboBoxAssembly
@@ -120,7 +120,7 @@ namespace AutoAssemblyMatcher
             comboBoxAssembly.Location = new Point(2, 2);
             comboBoxAssembly.Margin = new Padding(2);
             comboBoxAssembly.Name = "comboBoxAssembly";
-            comboBoxAssembly.Size = new Size(461, 23);
+            comboBoxAssembly.Size = new Size(491, 23);
             comboBoxAssembly.TabIndex = 7;
             comboBoxAssembly.SelectedIndexChanged += comboBoxAssembly_SelectedIndexChanged;
             // 
@@ -134,13 +134,13 @@ namespace AutoAssemblyMatcher
             flowLayoutPanel2.Location = new Point(2, 715);
             flowLayoutPanel2.Margin = new Padding(2);
             flowLayoutPanel2.Name = "flowLayoutPanel2";
-            flowLayoutPanel2.Size = new Size(461, 26);
+            flowLayoutPanel2.Size = new Size(491, 26);
             flowLayoutPanel2.TabIndex = 3;
             // 
             // buttonAssociate
             // 
             buttonAssociate.Anchor = AnchorStyles.None;
-            buttonAssociate.Location = new Point(381, 2);
+            buttonAssociate.Location = new Point(411, 2);
             buttonAssociate.Margin = new Padding(2);
             buttonAssociate.Name = "buttonAssociate";
             buttonAssociate.Size = new Size(78, 20);
@@ -152,7 +152,7 @@ namespace AutoAssemblyMatcher
             // buttonSkip
             // 
             buttonSkip.Anchor = AnchorStyles.None;
-            buttonSkip.Location = new Point(299, 2);
+            buttonSkip.Location = new Point(329, 2);
             buttonSkip.Margin = new Padding(2);
             buttonSkip.Name = "buttonSkip";
             buttonSkip.Size = new Size(78, 20);
@@ -164,7 +164,7 @@ namespace AutoAssemblyMatcher
             // buttonIgnore
             // 
             buttonIgnore.Anchor = AnchorStyles.None;
-            buttonIgnore.Location = new Point(217, 2);
+            buttonIgnore.Location = new Point(247, 2);
             buttonIgnore.Margin = new Padding(2);
             buttonIgnore.Name = "buttonIgnore";
             buttonIgnore.Size = new Size(78, 20);
@@ -179,11 +179,11 @@ namespace AutoAssemblyMatcher
             listViewDummy.Columns.AddRange(new ColumnHeader[] { columnHeader1 });
             listViewDummy.FullRowSelect = true;
             listViewDummy.HeaderStyle = ColumnHeaderStyle.None;
-            listViewDummy.Location = new Point(943, 39);
+            listViewDummy.Location = new Point(1004, 39);
             listViewDummy.MultiSelect = false;
             listViewDummy.Name = "listViewDummy";
             listViewDummy.OwnerDraw = true;
-            listViewDummy.Size = new Size(229, 679);
+            listViewDummy.Size = new Size(312, 679);
             listViewDummy.TabIndex = 3;
             listViewDummy.UseCompatibleStateImageBehavior = false;
             listViewDummy.View = View.Details;
@@ -199,7 +199,7 @@ namespace AutoAssemblyMatcher
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1184, 761);
+            ClientSize = new Size(1328, 761);
             Controls.Add(listViewDummy);
             Controls.Add(tableLayoutPanel1);
             Margin = new Padding(2);
