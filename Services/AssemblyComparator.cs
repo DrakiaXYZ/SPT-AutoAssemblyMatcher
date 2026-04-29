@@ -1,4 +1,6 @@
-﻿// Required NuGet package: AsmResolver.DotNet
+namespace AutoAssemblyMatcher.Services;
+
+// Required NuGet package: AsmResolver.DotNet
 
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
@@ -24,48 +26,6 @@ using AsmResolver.DotNet.Signatures.Types;
 /// </summary>
 public static class AssemblyComparator
 {
-    // -------------------------------------------------------------------------
-    // Public entry points
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Reads both DLLs from disk and compares the first public class in each.
-    /// </summary>
-    public static double CalculateFromFiles(string dllPath1, string dllPath2)
-    {
-        var module1 = ModuleDefinition.FromFile(dllPath1);
-        var module2 = ModuleDefinition.FromFile(dllPath2);
-        return CalculateFromModules(module1, module2);
-    }
-
-    /// <summary>
-    /// Reads both DLLs from in-memory byte arrays and compares the first
-    /// public class in each.
-    /// </summary>
-    public static double CalculateFromBytes(byte[] dllBytes1, byte[] dllBytes2)
-    {
-        var module1 = ModuleDefinition.FromImage(
-            AsmResolver.PE.PEImage.FromBytes(dllBytes1));
-        var module2 = ModuleDefinition.FromImage(
-            AsmResolver.PE.PEImage.FromBytes(dllBytes2));
-        return CalculateFromModules(module1, module2);
-    }
-
-    /// <summary>
-    /// Compares the first public concrete class found in each
-    /// <see cref="ModuleDefinition"/>.
-    /// </summary>
-    public static double CalculateFromModules(ModuleDefinition module1, ModuleDefinition module2)
-    {
-        var class1 = GetFirstClass(module1);
-        var class2 = GetFirstClass(module2);
-
-        if (class1 == null || class2 == null)
-            return 0.0;
-
-        return Calculate(class1, class2);
-    }
-
     // -------------------------------------------------------------------------
     // Core comparison
     // -------------------------------------------------------------------------
@@ -180,17 +140,6 @@ public static class AssemblyComparator
     // -------------------------------------------------------------------------
     // AsmResolver helpers
     // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Returns the first public, non-abstract, non-nested, non-compiler-generated
-    /// class defined in the module's top-level types.
-    /// </summary>
-    private static TypeDefinition? GetFirstClass(ModuleDefinition module)
-        => module.TopLevelTypes.FirstOrDefault(t =>
-               t.IsClass
-            && t.IsPublic
-            && !t.IsAbstract
-            && !IsCompilerGenerated(t));
 
     /// <summary>
     /// Counts explicit base types: the base class (if not System.Object) plus

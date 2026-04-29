@@ -1,8 +1,8 @@
-﻿using ScintillaNET;
+using ScintillaNET;
 
-namespace AutoAssemblyMatcher
+namespace AutoAssemblyMatcher.UI
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -30,52 +30,52 @@ namespace AutoAssemblyMatcher
         /// </summary>
         private void InitializeComponent()
         {
-            scintilla = new Scintilla();
-            scintilla1 = new Scintilla();
+            scintillaAssembly = new Scintilla();
+            scintillaDummy = new Scintilla();
             tableLayoutPanel1 = new TableLayoutPanel();
-            tableLayoutPanel2 = new TableLayoutPanel();
+            tableLayoutPanelDummyFooter = new TableLayoutPanel();
             comboBoxAssembly = new ComboBox();
             flowLayoutPanel2 = new FlowLayoutPanel();
             buttonAssociate = new Button();
             buttonSkip = new Button();
             buttonIgnore = new Button();
             listViewDummy = new ListView();
-            columnHeader1 = new ColumnHeader();
+            columnHeaderDummyName = new ColumnHeader();
             tableLayoutPanel1.SuspendLayout();
             flowLayoutPanel2.SuspendLayout();
             SuspendLayout();
             // 
-            // scintilla
+            // scintillaAssembly
             // 
-            scintilla.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            scintilla.AutocompleteListSelectedBackColor = Color.FromArgb(0, 120, 212);
-            scintilla.AutocompleteListTextColor = Color.Blue;
-            scintilla.LexerName = null;
-            scintilla.Location = new Point(2, 32);
-            scintilla.Margin = new Padding(2);
-            scintilla.Name = "scintilla";
-            scintilla.ScrollWidth = 293;
-            scintilla.Size = new Size(491, 679);
-            scintilla.TabIndex = 0;
-            scintilla.Text = "Loading...";
-            scintilla.ZoomChanged += scintilla_ZoomChanged;
-            scintilla.KeyDown += genericScintilla_KeyDown;
+            scintillaAssembly.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            scintillaAssembly.AutocompleteListSelectedBackColor = Color.FromArgb(0, 120, 212);
+            scintillaAssembly.AutocompleteListTextColor = Color.Blue;
+            scintillaAssembly.LexerName = null;
+            scintillaAssembly.Location = new Point(2, 32);
+            scintillaAssembly.Margin = new Padding(2);
+            scintillaAssembly.Name = "scintillaAssembly";
+            scintillaAssembly.ScrollWidth = 293;
+            scintillaAssembly.Size = new Size(491, 679);
+            scintillaAssembly.TabIndex = 0;
+            scintillaAssembly.Text = "Loading...";
+            scintillaAssembly.ZoomChanged += scintillaAssembly_ZoomChanged;
+            scintillaAssembly.KeyDown += genericScintilla_KeyDown;
             // 
-            // scintilla1
+            // scintillaDummy
             // 
-            scintilla1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            scintilla1.AutocompleteListSelectedBackColor = Color.FromArgb(0, 120, 212);
-            scintilla1.AutocompleteListTextColor = Color.Blue;
-            scintilla1.LexerName = null;
-            scintilla1.Location = new Point(497, 32);
-            scintilla1.Margin = new Padding(2);
-            scintilla1.Name = "scintilla1";
-            scintilla1.ScrollWidth = 293;
-            scintilla1.Size = new Size(492, 679);
-            scintilla1.TabIndex = 1;
-            scintilla1.Text = "Loading...";
-            scintilla1.ZoomChanged += scintilla1_ZoomChanged;
-            scintilla1.KeyDown += genericScintilla_KeyDown;
+            scintillaDummy.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            scintillaDummy.AutocompleteListSelectedBackColor = Color.FromArgb(0, 120, 212);
+            scintillaDummy.AutocompleteListTextColor = Color.Blue;
+            scintillaDummy.LexerName = null;
+            scintillaDummy.Location = new Point(497, 32);
+            scintillaDummy.Margin = new Padding(2);
+            scintillaDummy.Name = "scintillaDummy";
+            scintillaDummy.ScrollWidth = 293;
+            scintillaDummy.Size = new Size(492, 679);
+            scintillaDummy.TabIndex = 1;
+            scintillaDummy.Text = "Loading...";
+            scintillaDummy.ZoomChanged += scintillaDummy_ZoomChanged;
+            scintillaDummy.KeyDown += genericScintilla_KeyDown;
             // 
             // tableLayoutPanel1
             // 
@@ -83,10 +83,10 @@ namespace AutoAssemblyMatcher
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 1, 2);
+            tableLayoutPanel1.Controls.Add(tableLayoutPanelDummyFooter, 1, 2);
             tableLayoutPanel1.Controls.Add(comboBoxAssembly, 0, 0);
-            tableLayoutPanel1.Controls.Add(scintilla, 0, 1);
-            tableLayoutPanel1.Controls.Add(scintilla1, 1, 1);
+            tableLayoutPanel1.Controls.Add(scintillaAssembly, 0, 1);
+            tableLayoutPanel1.Controls.Add(scintillaDummy, 1, 1);
             tableLayoutPanel1.Controls.Add(flowLayoutPanel2, 0, 2);
             tableLayoutPanel1.Location = new Point(8, 7);
             tableLayoutPanel1.Margin = new Padding(2);
@@ -98,18 +98,18 @@ namespace AutoAssemblyMatcher
             tableLayoutPanel1.Size = new Size(991, 743);
             tableLayoutPanel1.TabIndex = 2;
             // 
-            // tableLayoutPanel2
+            // tableLayoutPanelDummyFooter
             // 
-            tableLayoutPanel2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            tableLayoutPanel2.ColumnCount = 2;
-            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel2.Location = new Point(498, 716);
-            tableLayoutPanel2.Name = "tableLayoutPanel2";
-            tableLayoutPanel2.RowCount = 1;
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel2.Size = new Size(490, 24);
-            tableLayoutPanel2.TabIndex = 3;
+            tableLayoutPanelDummyFooter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanelDummyFooter.ColumnCount = 2;
+            tableLayoutPanelDummyFooter.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanelDummyFooter.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanelDummyFooter.Location = new Point(498, 716);
+            tableLayoutPanelDummyFooter.Name = "tableLayoutPanelDummyFooter";
+            tableLayoutPanelDummyFooter.RowCount = 1;
+            tableLayoutPanelDummyFooter.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanelDummyFooter.Size = new Size(490, 24);
+            tableLayoutPanelDummyFooter.TabIndex = 3;
             // 
             // comboBoxAssembly
             // 
@@ -176,7 +176,7 @@ namespace AutoAssemblyMatcher
             // listViewDummy
             // 
             listViewDummy.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            listViewDummy.Columns.AddRange(new ColumnHeader[] { columnHeader1 });
+            listViewDummy.Columns.AddRange(new ColumnHeader[] { columnHeaderDummyName });
             listViewDummy.FullRowSelect = true;
             listViewDummy.HeaderStyle = ColumnHeaderStyle.None;
             listViewDummy.Location = new Point(1004, 39);
@@ -190,12 +190,12 @@ namespace AutoAssemblyMatcher
             listViewDummy.DrawItem += listViewDummy_DrawItem;
             listViewDummy.SelectedIndexChanged += listViewDummy_SelectedIndexChanged;
             // 
-            // columnHeader1
+            // columnHeaderDummyName
             // 
-            columnHeader1.Text = "";
-            columnHeader1.Width = 225;
+            columnHeaderDummyName.Text = "";
+            columnHeaderDummyName.Width = 225;
             // 
-            // Form1
+            // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -203,10 +203,10 @@ namespace AutoAssemblyMatcher
             Controls.Add(listViewDummy);
             Controls.Add(tableLayoutPanel1);
             Margin = new Padding(2);
-            Name = "Form1";
-            Text = "Form1";
-            Shown += Form1_Shown;
-            ResizeEnd += Form1_ResizeEnd;
+            Name = "MainForm";
+            Text = "MainForm";
+            Shown += MainForm_Shown;
+            ResizeEnd += MainForm_ResizeEnd;
             tableLayoutPanel1.ResumeLayout(false);
             flowLayoutPanel2.ResumeLayout(false);
             ResumeLayout(false);
@@ -214,16 +214,16 @@ namespace AutoAssemblyMatcher
 
         #endregion
 
-        private ScintillaNET.Scintilla scintilla;
-        private Scintilla scintilla1;
+        private ScintillaNET.Scintilla scintillaAssembly;
+        private Scintilla scintillaDummy;
         private TableLayoutPanel tableLayoutPanel1;
         private FlowLayoutPanel flowLayoutPanel2;
         private Button buttonIgnore;
         private Button buttonSkip;
         private Button buttonAssociate;
         private ComboBox comboBoxAssembly;
-        private TableLayoutPanel tableLayoutPanel2;
+        private TableLayoutPanel tableLayoutPanelDummyFooter;
         private ListView listViewDummy;
-        private ColumnHeader columnHeader1;
+        private ColumnHeader columnHeaderDummyName;
     }
 }
