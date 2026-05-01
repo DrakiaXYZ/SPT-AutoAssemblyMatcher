@@ -50,7 +50,7 @@ public class PersistenceService
         var usedNames = new HashSet<string>();
         var mappedNames = new HashSet<string>();
 
-        var options = new JsonDocumentOptions { AllowTrailingCommas = true };
+        var options = new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
 
         var mappings = JsonNode.Parse(File.ReadAllText(mappingFilePath), documentOptions: options).AsObject();
         foreach (var property in mappings)

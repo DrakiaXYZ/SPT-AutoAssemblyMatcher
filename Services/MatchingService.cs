@@ -68,9 +68,14 @@ public class MatchingService
         {
             remap.NewNamespace = newType.Namespace;
         }
-        if (newType.NestedTypes.Count > 0)
+        if (oldType.NestedTypes.Any(x => !x.IsCompilerGenerated()))
         {
-            remap.HasChildClasses = oldType.NestedTypes.Any(x => !x.IsCompilerGenerated());
+            remap.HasChildClasses = true;
+            remap.NestedTypes = new();
+            foreach (var nestedType in oldType.NestedTypes.Where(x => !x.IsCompilerGenerated()))
+            {
+                remap.NestedTypes[nestedType.Name] = new() { ["NewName"] = "" };
+            }
         }
 
         return remap;

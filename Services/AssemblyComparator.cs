@@ -32,7 +32,7 @@ public static class AssemblyComparator
 
     public static double Calculate(TypeDefinition class1, TypeDefinition class2)
     {
-        // ── 1. Inheritance count guard ────────────────────────────────────────
+        // ── 1. Inheritance count guard ────────────────────────────────────────────
         if (GetBaseCount(class1) != GetBaseCount(class2))
             return 0.0;
 
@@ -307,6 +307,9 @@ public static class AssemblyComparator
     /// <paramref name="owningType"/>) are replaced with the placeholder "!Self"
     /// so that class names that differ between the two assemblies being compared
     /// do not prevent a match.
+    ///
+    /// Only the simple type Name (not FullName) is used for non-primitive types
+    /// so that "Foo.Bar.EInteractState" and "Baz.EInteractState" compare equal.
     /// </summary>
     private static string TypeKey(
         TypeSignature? sig,
@@ -333,18 +336,21 @@ public static class AssemblyComparator
 
             // Constructed generics: name + all type arguments, e.g. "List`1[System.String]"
             // Check for self-reference before expanding arguments.
+            // Use Name (not FullName) so that types from different namespaces compare equal.
             GenericInstanceTypeSignature generic
                 => IsSelfReference(generic.GenericType, owningType)
                     ? $"!Self`{generic.TypeArguments.Count}"
-                    : $"{generic.GenericType.FullName}"
+                    : $"{generic.GenericType.Name}"
                      + $"[{string.Join(",", generic.TypeArguments.Select(t => TypeKey(t, genericParams, owningType)))}]",
 
             // Non-generic type reference — the most common place a self-reference appears
             // (e.g. a method returning MyClass, or a field of type MyClass).
+            // Use Name (not FullName) so that "Foo.Bar.EInteractState" compares
+            // equal to "Baz.EInteractState" — only the simple type name is checked.
             TypeDefOrRefSignature typeRef
                 => IsSelfReference(typeRef.Type, owningType)
                     ? "!Self"
-                    : typeRef.FullName,
+                    : typeRef.Name,
 
             // Single-dimension arrays (most common)
             SzArrayTypeSignature szArr
