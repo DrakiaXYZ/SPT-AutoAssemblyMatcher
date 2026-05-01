@@ -45,6 +45,7 @@ public class MatchingService
     {
         return AssemblyComparator.Calculate(reference, dummyModule)
             .Where(x => !usedNames.Contains(x.Type.FullName))
+            .Where(x => !x.Type.IsCompilerGenerated())
             .Select(x => (new AssemblyType(x.Type.Name, x.Type), x.Score))
             .ToList();
     }

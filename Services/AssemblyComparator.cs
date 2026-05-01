@@ -40,6 +40,9 @@ public static class AssemblyComparator
         var (publicMethods1, privateMethods1) = SplitMethods(class1);
         var (publicMethods2, privateMethods2) = SplitMethods(class2);
 
+        var constructors1 = GetConstructors(class1);
+        var constructors2 = GetConstructors(class2);
+
         var fields1 = GetFields(class1);
         var fields2 = GetFields(class2);
 
@@ -50,14 +53,19 @@ public static class AssemblyComparator
         int totalPoints = 0;
         int earnedPoints = 0;
 
-        ScoreCategory(
-            publicMethods1.Select(m => PublicMethodKey(m, class1)).ToList(),
-            publicMethods2.Select(m => PublicMethodKey(m, class2)).ToList(),
+        ScoreMethodCategory(
+            publicMethods1.Select(m => MethodSignature.FromPublic(m, class1)).ToList(),
+            publicMethods2.Select(m => MethodSignature.FromPublic(m, class2)).ToList(),
             ref totalPoints, ref earnedPoints);
 
-        ScoreCategory(
-            privateMethods1.Select(m => AnonymousMethodKey(m, class1)).ToList(),
-            privateMethods2.Select(m => AnonymousMethodKey(m, class2)).ToList(),
+        ScoreMethodCategory(
+            privateMethods1.Select(m => MethodSignature.FromAnonymous(m, class1)).ToList(),
+            privateMethods2.Select(m => MethodSignature.FromAnonymous(m, class2)).ToList(),
+            ref totalPoints, ref earnedPoints);
+
+        ScoreConstructorCategory(
+            constructors1.Select(m => ConstructorSignature.From(m, class1)).ToList(),
+            constructors2.Select(m => ConstructorSignature.From(m, class2)).ToList(),
             ref totalPoints, ref earnedPoints);
 
         ScoreCategory(
@@ -111,9 +119,12 @@ public static class AssemblyComparator
     }
 
     // -------------------------------------------------------------------------
-    // Scoring (identical algorithm to previous versions)
+    // Scoring
     // -------------------------------------------------------------------------
 
+    /// <summary>
+    /// Scores non-method members (fields, properties) as all-or-nothing per member.
+    /// </summary>
     private static void ScoreCategory(
         List<string> keys1,
         List<string> keys2,
@@ -135,6 +146,232 @@ public static class AssemblyComparator
 
         totalPoints += Math.Max(keys1.Count, keys2.Count);
         earnedPoints += matched;
+    }
+
+    /// <summary>
+    /// Scores methods with per-component granularity.
+    ///
+    /// For each method in <paramref name="sigs1"/>, finds the best candidate in
+    /// <paramref name="sigs2"/> and scores it as follows:
+    ///   +1 if the method name matches
+    ///   +1 if the return type matches
+    ///   +1 per matching parameter type (only if param counts are equal; otherwise 0)
+    ///
+    /// Total possible points per method = 2 + param count.
+    /// Methods missing or extra in sigs2 earn 0 for all their possible points.
+    /// </summary>
+    private static void ScoreMethodCategory(
+        List<MethodSignature> sigs1,
+        List<MethodSignature> sigs2,
+        ref int totalPoints,
+        ref int earnedPoints)
+    {
+        var remaining2 = new List<MethodSignature>(sigs2);
+
+        foreach (var m1 in sigs1)
+        {
+            int possiblePoints = 2 + m1.ParamTypes.Count;
+            int bestMatch = -1;
+            int bestScore = -1;
+
+            for (int i = 0; i < remaining2.Count; i++)
+            {
+                var m2 = remaining2[i];
+
+                int score = 0;
+                if (m1.MethodName == m2.MethodName) score++;
+
+                // If one side returns void and the other doesn't, this candidate
+                // is disqualified entirely — don't pair them at all.
+                bool m1Void = m1.ReturnType == "void";
+                bool m2Void = m2.ReturnType == "void";
+                if (m1Void != m2Void) continue;
+
+                if (m1.ReturnType == m2.ReturnType) score++;
+
+                int paramScore = ScoreParams(m1.ParamTypes, m2.ParamTypes);
+                if (paramScore >= 0) score += paramScore;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestMatch = i;
+
+                    // Early exit if we already found a perfect match.
+                    if (bestScore == possiblePoints) break;
+                }
+            }
+
+            totalPoints += possiblePoints;
+
+            if (bestMatch >= 0)
+            {
+                earnedPoints += bestScore;
+                remaining2.RemoveAt(bestMatch);
+            }
+        }
+
+        // Extra methods in sigs2 with no counterpart in sigs1 penalise the score.
+        foreach (var extra in remaining2)
+        {
+            totalPoints += 2 + extra.ParamTypes.Count;
+        }
+    }
+
+    /// <summary>
+    /// Scores parameter lists pairwise by position, returning the number of
+    /// matching positions.  Returns -1 if the parameter counts differ, which
+    /// the caller treats as a disqualifying mismatch (scores 0 for the method).
+    /// </summary>
+    private static int ScoreParams(IReadOnlyList<string> params1, IReadOnlyList<string> params2)
+    {
+        if (params1.Count != params2.Count)
+            return -1;
+
+        int score = 0;
+        for (int i = 0; i < params1.Count; i++)
+        {
+            if (params1[i] == params2[i])
+                score++;
+        }
+        return score;
+    }
+
+    /// <summary>
+    /// Scores constructors using the same per-parameter rules as methods.
+    /// Constructors have no name or return type to score — only parameter types.
+    /// Total possible points per constructor = param count.
+    /// </summary>
+    private static void ScoreConstructorCategory(
+        List<ConstructorSignature> sigs1,
+        List<ConstructorSignature> sigs2,
+        ref int totalPoints,
+        ref int earnedPoints)
+    {
+        var remaining2 = new List<ConstructorSignature>(sigs2);
+
+        foreach (var c1 in sigs1)
+        {
+            int possiblePoints = c1.ParamTypes.Count;
+            int bestMatch = -1;
+            int bestScore = -1;
+
+            for (int i = 0; i < remaining2.Count; i++)
+            {
+                // Parameter count must match exactly (same rule as methods).
+                int paramScore = ScoreParams(c1.ParamTypes, remaining2[i].ParamTypes);
+                if (paramScore >= 0 && paramScore > bestScore)
+                {
+                    bestScore = paramScore;
+                    bestMatch = i;
+
+                    if (bestScore == possiblePoints) break;
+                }
+            }
+
+            totalPoints += possiblePoints;
+
+            if (bestMatch >= 0)
+            {
+                earnedPoints += bestScore;
+                remaining2.RemoveAt(bestMatch);
+            }
+        }
+
+        // Extra constructors in sigs2 penalise the score.
+        foreach (var extra in remaining2)
+            totalPoints += extra.ParamTypes.Count;
+    }
+
+    // -------------------------------------------------------------------------
+    // ConstructorSignature
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Holds the parameter type keys for a single constructor.
+    /// Constructors have no name or return type to score.
+    /// </summary>
+    private sealed class ConstructorSignature
+    {
+        public IReadOnlyList<string> ParamTypes { get; }
+
+        private ConstructorSignature(IReadOnlyList<string> paramTypes)
+            => ParamTypes = paramTypes;
+
+        public static ConstructorSignature From(MethodDefinition m, TypeDefinition owningType)
+        {
+            var genericParams = GenericParamNames(owningType);
+            var paramTypes = m.Signature?.ParameterTypes
+                              .Select(t => TypeKey(t, genericParams, owningType))
+                              .ToList()
+                             ?? [];
+
+            return new ConstructorSignature(paramTypes);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // MethodSignature — separates identity from parameter list
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Decomposes a method into its individually scored components:
+    /// method name, return type, and a list of parameter type keys.
+    /// </summary>
+    private sealed class MethodSignature
+    {
+        /// <summary>
+        /// The method name used for matching.
+        /// For public methods: the declared name.
+        /// For anonymous methods: empty string (name is irrelevant).
+        /// </summary>
+        public string MethodName { get; }
+
+        /// <summary>The return type key.</summary>
+        public string ReturnType { get; }
+
+        /// <summary>Individual parameter type keys, one entry per parameter.</summary>
+        public IReadOnlyList<string> ParamTypes { get; }
+
+        private MethodSignature(string methodName, string returnType, IReadOnlyList<string> paramTypes)
+        {
+            MethodName = methodName;
+            ReturnType = returnType;
+            ParamTypes = paramTypes;
+        }
+
+        public static MethodSignature FromPublic(MethodDefinition m, TypeDefinition owningType)
+        {
+            var genericParams = GenericParamNames(m);
+            var returnType = TypeKey(m.Signature?.ReturnType, genericParams, owningType);
+
+            var methodName = m.Name?.ToString() ?? "";
+            var dotIndex = methodName.IndexOf('.');
+            if (dotIndex >= 0)
+                methodName = methodName[dotIndex..];
+
+            var paramTypes = m.Signature?.ParameterTypes
+                              .Select(t => TypeKey(t, genericParams, owningType))
+                              .ToList()
+                             ?? [];
+
+            return new MethodSignature(methodName, returnType, paramTypes);
+        }
+
+        public static MethodSignature FromAnonymous(MethodDefinition m, TypeDefinition owningType)
+        {
+            var genericParams = GenericParamNames(m);
+            var returnType = TypeKey(m.Signature?.ReturnType, genericParams, owningType);
+
+            var paramTypes = m.Signature?.ParameterTypes
+                              .Select(t => TypeKey(t, genericParams, owningType))
+                              .ToList()
+                             ?? [];
+
+            // Anonymous methods are matched by return type + params only;
+            // the name is not scored so it is left empty.
+            return new MethodSignature(string.Empty, returnType, paramTypes);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -201,6 +438,15 @@ public static class AssemblyComparator
     }
 
     /// <summary>
+    /// Returns instance and static constructors declared on the type,
+    /// excluding the default parameterless constructor if it is compiler-generated.
+    /// </summary>
+    private static List<MethodDefinition> GetConstructors(TypeDefinition t)
+        => t.Methods
+            .Where(m => m.IsConstructor && !IsCompilerGenerated(m))
+            .ToList();
+
+    /// <summary>
     /// Returns fields declared on the type, excluding compiler-generated
     /// backing fields (e.g. auto-property storage).
     /// </summary>
@@ -215,31 +461,6 @@ public static class AssemblyComparator
     // -------------------------------------------------------------------------
     // Key builders
     // -------------------------------------------------------------------------
-
-    private static string PublicMethodKey(MethodDefinition m, TypeDefinition owningType)
-    {
-        var genericParams = GenericParamNames(m);
-        var paramTypes = m.Signature?.ParameterTypes.Select(t => TypeKey(t, genericParams, owningType))
-                        ?? Enumerable.Empty<string>();
-
-        var methodName = m.Name.ToString();
-        var dotIndex = methodName.IndexOf('.');
-        if (dotIndex >= 0)
-        {
-            methodName = methodName[dotIndex..];
-        }
-
-        return $"{methodName}|{TypeKey(m.Signature?.ReturnType, genericParams, owningType)}|({string.Join(",", paramTypes)})";
-    }
-
-    private static string AnonymousMethodKey(MethodDefinition m, TypeDefinition owningType)
-    {
-        var genericParams = GenericParamNames(m);
-        var paramTypes = m.Signature?.ParameterTypes.Select(t => TypeKey(t, genericParams, owningType))
-                        ?? Enumerable.Empty<string>();
-
-        return $"{TypeKey(m.Signature?.ReturnType, genericParams, owningType)}|({string.Join(",", paramTypes)})";
-    }
 
     private static string FieldKey(FieldDefinition f, TypeDefinition owningType)
     {

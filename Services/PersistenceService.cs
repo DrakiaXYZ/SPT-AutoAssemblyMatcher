@@ -55,6 +55,7 @@ public class PersistenceService
         var mappings = JsonNode.Parse(File.ReadAllText(mappingFilePath), documentOptions: options).AsObject();
         foreach (var property in mappings)
         {
+            if (property.Value["NewName"] == null) continue;
             var newName = GetFullName(property.Value["NewName"].ToString(), property.Value["NewNamespace"]?.ToString());
             usedNames.Add(newName);
             mappedNames.Add(property.Key);
